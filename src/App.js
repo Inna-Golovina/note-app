@@ -10,11 +10,11 @@ import {FirebaseState} from './context/firebase/FirebaseState'
 function App() {
   return (
     <FirebaseState>
-     <AlertState>
+      <AlertState>
         <BrowserRouter>
-          <Navbar />
+          <Navbar/>
           <div className="container pt-4">
-            <Alert />
+            <Alert/>
             <Switch>
               <Route path={'/'} exact component={Home}/>
               <Route path={'/about'} component={About}/>

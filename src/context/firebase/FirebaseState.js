@@ -1,10 +1,10 @@
-import React, {useReducer} from 'react'
-import axios from 'axios'
-import {FirebaseContext} from './firebaseContext'
-import {firebaseReducer} from './firebaseReducer'
-import {ADD_NOTE, FETCH_NOTES, REMOVE_NOTE, SHOW_LOADER} from '../types'
+import React, {useReducer} from 'react';
+import axios from 'axios';
+import {FirebaseContext} from './firebaseContext';
+import {firebaseReducer} from './firebaseReducer';
+import {ADD_NOTE, FETCH_NOTES, REMOVE_NOTE, SHOW_LOADER} from '../types';
 
-const url = process.env.REACT_APP_DB_URL;
+const url = 'https://react-notes-81907-default-rtdb.firebaseio.com';
 
 export const FirebaseState = ({children}) => {
   const initialState = {
@@ -18,17 +18,42 @@ export const FirebaseState = ({children}) => {
   const fetchNotes = async () => {
     showLoader();
 
-    const result = await axios.get(`${url}/notes.json`);
+    const res = await axios.get(`${url}/notes.json`);
 
-    console.log('fetchNotes', result.data);
+    const payload = Object.keys(res.data).map(key => {
+      return {
+        ...res.data[key],
+        id: key
+      }
+    })
+
+    dispatch({
+      type: FETCH_NOTES,
+      payload, //payload: payload
+    })
+
   }
 
   const addNote = async title => {
     const note = {
       title, date: new Date().toJSON()
     }
-    const res = await axios.post(`${url.notes.json}`, note);
-    console.log('addNote', res.data);
+
+    try {
+      const res = await axios.post(`${url}/notes.json`, note);
+      const payload = {
+        ...note,
+        id: res.data.name,
+      }
+
+      dispatch({
+        type: ADD_NOTE,
+        payload, //payload: payload
+      })
+
+    } catch (e) {
+      throw new Error(e.message);
+    } 
   }
 
   const removeNote = async id => {
@@ -40,16 +65,13 @@ export const FirebaseState = ({children}) => {
     })
   }
 
-
-  
   return (
-    <FirebaseContext value={{
+    <FirebaseContext.Provider value={{
       showLoader, fetchNotes, addNote, removeNote,
       loading: state.loading,
       notes: state.notes,
     }}>
       {children}
-    </FirebaseContext>
+    </FirebaseContext.Provider>
   )
-
 }
